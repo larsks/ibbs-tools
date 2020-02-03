@@ -12,13 +12,13 @@ clean:
 	rm -f $(GENERATED)
 
 magiterm.ini: $(IBBS)/syncterm.lst
-	python sync2magi.py -i $< -o $@
+	ibbs sync2magi -i $< -o $@
 
 qodem.ini: $(IBBS)/syncterm.lst
-	python sync2qodem.py -i $< -o $@
+	ibbs sync2qodem -i $< -o $@
 
 ibbs.json: $(IBBS)/syncterm.lst
-	python sync2json.py -i $< -o $@
+	ibbs sync2json -i $< -o $@
 
 $(IBBS).zip:
 	curl -o $@ $(IBBS_URL)

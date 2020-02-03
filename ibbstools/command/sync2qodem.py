@@ -1,6 +1,7 @@
 import click
-import syncterm
 import sys
+
+import ibbstools.syncterm
 
 qodem_template = '''
 name={name}
@@ -34,13 +35,12 @@ keybindings_filename=
 '''
 
 
-@click.command()
 @click.option('-i', '--input', 'inputfile',
               default='syncterm.lst')
 @click.option('-o', '--output', 'outputfile',
               type=click.File('w'), default=sys.stdout)
-def main(inputfile, outputfile):
-    sync = syncterm.SynctermLst()
+def command(inputfile, outputfile):
+    sync = ibbstools.syncterm.SynctermLst()
     with open(inputfile, 'r') as fd:
         bbslist = sync.parse(fd)
 
@@ -48,7 +48,3 @@ def main(inputfile, outputfile):
             for bbs in bbslist:
                 bbs['qodem_method'] = bbs['connectiontype'].upper()
                 outputfile.write(qodem_template.format(**bbs))
-
-
-if __name__ == '__main__':
-    main()

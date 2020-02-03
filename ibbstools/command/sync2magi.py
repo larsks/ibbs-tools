@@ -1,6 +1,7 @@
 import click
-import syncterm
 import sys
+
+import ibbstools.syncterm
 
 magiterm_connection_types = ['ssh', 'telnet']
 
@@ -12,13 +13,12 @@ conn type = {magiterm_conn_type}
 '''
 
 
-@click.command()
-@click.option('-i', '--input', 'inputfile',
-              default='syncterm.lst')
+@click.option('-i', '--input', 'inputfile', default='syncterm.lst')
 @click.option('-o', '--output', 'outputfile',
-              type=click.File('w'), default=sys.stdout)
-def main(inputfile, outputfile):
-    sync = syncterm.SynctermLst()
+              type=click.File('w'),
+              default=sys.stdout)
+def command(inputfile, outputfile):
+    sync = ibbstools.syncterm.SynctermLst()
     with open(inputfile, 'r') as fd:
         bbslist = sync.parse(fd)
 
@@ -27,7 +27,3 @@ def main(inputfile, outputfile):
                 bbs['magiterm_conn_type'] = magiterm_connection_types.index(
                         bbs['connectiontype'].lower())
                 outputfile.write(magiterm_template.format(**bbs))
-
-
-if __name__ == '__main__':
-    main()

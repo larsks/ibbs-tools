@@ -170,10 +170,11 @@ def check_async(ctx, inputfile, database, timeout,
 
     for result in done:
         bbs, status = result.result()
-        bbsref, created = BBS.get_or_create(name=bbs['name'],
-                                            address=bbs['address'],
-                                            port=bbs['port'],
-                                            method=bbs['connectiontype'])
+        bbsref, created = BBS.get_or_create(
+            name=bbs['name'],
+            address=bbs['address'],
+            port=bbs['port'],
+            method=bbs['connectiontype'].lower())
 
         statusref = Status(bbs=bbsref,
                            checked=now,

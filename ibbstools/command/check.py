@@ -5,15 +5,14 @@ import enum
 import errno
 import fnmatch
 import logging
-import peewee
 import socket
 
 import concurrent.futures
 
 import ibbstools.syncterm
+from ibbstools.models import BBSDB, BBS, Status
 
 LOG = logging.getLogger(__name__)
-BBSDB = peewee.SqliteDatabase(None)
 
 
 class STATUS(enum.Enum):
@@ -23,26 +22,6 @@ class STATUS(enum.Enum):
     UNKNOWN = 3
     UNREACHABLE = 4
     OTHER = 10
-
-
-class BBS(peewee.Model):
-    name = peewee.TextField(unique=True)
-    address = peewee.TextField()
-    port = peewee.IntegerField()
-    method = peewee.TextField()
-
-    class Meta:
-        database = BBSDB
-
-
-class Check(peewee.Model):
-
-    bbs = peewee.ForeignKeyField(BBS, backref='checks')
-    when = peewee.DateTimeField()
-    status = peewee.TextField()
-
-    class Meta:
-        database = BBSDB
 
 
 def try_connect(host, port, timeout=10):
@@ -81,7 +60,7 @@ def try_connect(host, port, timeout=10):
 def check(inputfile, database, timeout, patterns):
     BBSDB.init(database)
     BBSDB.connect()
-    BBSDB.create_tables([BBS, Check])
+    BBSDB.create_tables([BBS, Status])
 
     sync = ibbstools.syncterm.SynctermLst()
     now = datetime.datetime.utcnow()
@@ -100,14 +79,16 @@ def check(inputfile, database, timeout, patterns):
                                                 port=bbs['port'],
                                                 method=bbs['connectiontype'])
 
-            status = try_connect(bbs['address'], bbs['port'],
+            status = try_connect(bbs['address'],
+                                 bbs['port'],
                                  timeout=timeout)
 
-            check = Check(bbs=bbsref, when=now,
-                          status=str(status).split('.')[1])
+            statusref = Status(bbs=bbsref,
+                               checked=now,
+                               status=str(status).split('.')[1])
 
             bbsref.save()
-            check.save()
+            statusref.save()
 
 
 async def async_try_connect(bbs, sem, timeout=None):
@@ -162,7 +143,7 @@ def check_async(ctx, inputfile, database, timeout, max_concurrency, patterns):
 
     BBSDB.init(database)
     BBSDB.connect()
-    BBSDB.create_tables([BBS, Check])
+    BBSDB.create_tables([BBS, Status])
 
     sync = ibbstools.syncterm.SynctermLst()
     now = datetime.datetime.utcnow()
@@ -176,7 +157,8 @@ def check_async(ctx, inputfile, database, timeout, max_concurrency, patterns):
                               for pattern in patterns))
 
         sem = asyncio.Semaphore(max_concurrency)
-        tasks = [async_try_connect(bbs, sem, timeout=timeout) for bbs in bbslist]
+        tasks = [async_try_connect(bbs, sem, timeout=timeout)
+                 for bbs in bbslist]
         done, pending = loop.run_until_complete(
             asyncio.wait(tasks)
         )
@@ -188,8 +170,9 @@ def check_async(ctx, inputfile, database, timeout, max_concurrency, patterns):
                                             port=bbs['port'],
                                             method=bbs['connectiontype'])
 
-        check = Check(bbs=bbsref, when=now,
-                      status=str(status).split('.')[1])
+        statusref = Status(bbs=bbsref,
+                           checked=now,
+                           status=str(status).split('.')[1])
 
         bbsref.save()
-        check.save()
+        statusref.save()

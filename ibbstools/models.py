@@ -9,7 +9,7 @@ class BBS(peewee.Model):
     port = peewee.IntegerField()
     method = peewee.TextField()
 
-    class Meta: # NOQA
+    class Meta:
         database = BBSDB
 
 
@@ -19,5 +19,5 @@ class Status(peewee.Model):
     checked = peewee.DateTimeField()
     status = peewee.TextField()
 
-    class Meta: # NOQA
+    class Meta:
         database = BBSDB

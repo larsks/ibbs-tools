@@ -1,2 +1,2 @@
 [flake8]
-ignore = H301
+ignore = H301, H238

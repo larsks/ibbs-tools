@@ -1,3 +1,4 @@
+import datetime
 import peewee
 
 BBSDB = peewee.SqliteDatabase(None)
@@ -8,6 +9,7 @@ class BBS(peewee.Model):
     address = peewee.TextField()
     port = peewee.IntegerField()
     method = peewee.TextField()
+    created_date = peewee.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
         database = BBSDB

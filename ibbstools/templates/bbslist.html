@@ -3,13 +3,21 @@
 {% block title %}Internet BBS List{% endblock %}
 
 {% block content %}
+<ul class="nav">
+  <li><a href="index.html">All</a></li>
+  <li><a href="up.html">Up</a></li>
+  <li><a href="down.html">Down</a></li>
+</ul>
+
 <table>
   <tr>
+    <th>#</th>
     <th>Name</th><th>Status</th><th>Method</th><th>Address</th><th>Port</th><th>History</th>
     <th>Last checked (UTC)</th>
   </tr>
 {% for bbs in bbslist %}
   <tr>
+    <td>{{ loop.index }}</td>
     <td>{{ bbs.bbs.name }}</td>
     <td>{% if bbs.status == "OPEN" %}UP{% else %}DOWN{% endif %}</td>
     <td>{{ bbs.bbs.method }}</td>
@@ -19,7 +27,7 @@
 {% for status in get_bbs_status(bbs.bbs, 10) %}
 <span class="{{status.status}} tooltip">
   {% if status.status == 'OPEN' %}😀{% else %}😡{% endif %}
-  <span class="tooltiptext">{{ status.checked }}</span>
+  <span class="tooltiptext">{{ status.checked }} {{ status.status }}</span>
 </span>
 {% endfor %}
     </td>

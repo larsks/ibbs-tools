@@ -107,11 +107,13 @@ def check_async(ctx, inputfile, database, timeout,
             name=bbs['name'],
             address=bbs['address'],
             port=bbs['port'],
-            created_date=now,
             method=bbs['connectiontype'].lower())
 
+        if created:
+            bbsref.created_date = now;
+
         statusref = Status(bbs=bbsref,
-                           checked=now,
+                           check_date=now,
                            status=str(status).split('.')[1])
 
         bbsref.save()

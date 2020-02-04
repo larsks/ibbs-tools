@@ -1,7 +1,8 @@
 import datetime
 import peewee
 
-BBSDB = peewee.SqliteDatabase(None)
+BBSDB = peewee.SqliteDatabase(None,
+                              pragmas=(('foreign_keys', 'on'),))
 
 
 class BBS(peewee.Model):
@@ -17,7 +18,10 @@ class BBS(peewee.Model):
 
 class Status(peewee.Model):
 
-    bbs = peewee.ForeignKeyField(BBS, backref='checks')
+    bbs = peewee.ForeignKeyField(
+        BBS,
+        backref='checks',
+        on_delete='CASCADE')
     check_date = peewee.DateTimeField()
     status = peewee.TextField()
 

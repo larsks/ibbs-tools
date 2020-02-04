@@ -24,73 +24,6 @@ class STATUS(enum.Enum):
     OTHER = 10
 
 
-def try_connect(host, port, timeout=10):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(timeout)
-        s.connect((host, int(port)))
-        s.shutdown(socket.SHUT_RDWR)
-    except socket.timeout:
-        LOG.debug('connection failed: timeout')
-        return STATUS.TIMEOUT
-    except ConnectionRefusedError:
-        LOG.debug('connection failed: refused')
-        return STATUS.REFUSED
-    except socket.gaierror:
-        LOG.debug('connection failed: hostname unknown')
-        return STATUS.UNKNOWN
-    except OSError as err:
-        LOG.error('connection failed: %s: %s', type(err), err)
-        if err.errno == errno.EHOSTUNREACH:
-            return STATUS.UNREACHABLE
-        else:
-            return STATUS.OTHER
-    except Exception as err:
-        LOG.error('connection failed: %s: %s', type(err), err)
-        return STATUS.OTHER
-    else:
-        return STATUS.OPEN
-
-
-@click.option('-i', '--input', 'inputfile',
-              default='syncterm.lst')
-@click.option('-d', '--database', default='bbsdb.sqlite')
-@click.option('-t', '--timeout', type=int, default=10)
-@click.argument('patterns', nargs=-1)
-def check(inputfile, database, timeout, patterns):
-    BBSDB.init(database)
-    BBSDB.connect()
-    BBSDB.create_tables([BBS, Status])
-
-    sync = ibbstools.syncterm.SynctermLst()
-    now = datetime.datetime.utcnow()
-    with open(inputfile, 'r') as fd:
-        bbslist = sync.parse(fd)
-        if patterns:
-            bbslist = (bbs for bbs in bbslist
-                       if any(fnmatch.fnmatch(bbs['name'], pattern)
-                              for pattern in patterns))
-
-        for bbs in bbslist:
-            LOG.info('checking %s at %s:%s',
-                     bbs['name'], bbs['address'], bbs['port'])
-            bbsref, created = BBS.get_or_create(name=bbs['name'],
-                                                address=bbs['address'],
-                                                port=bbs['port'],
-                                                method=bbs['connectiontype'])
-
-            status = try_connect(bbs['address'],
-                                 bbs['port'],
-                                 timeout=timeout)
-
-            statusref = Status(bbs=bbsref,
-                               checked=now,
-                               status=str(status).split('.')[1])
-
-            bbsref.save()
-            statusref.save()
-
-
 async def async_try_connect(bbs, sem, timeout=None):
     name = bbs['name']
     host = bbs['address']
@@ -174,6 +107,7 @@ def check_async(ctx, inputfile, database, timeout,
             name=bbs['name'],
             address=bbs['address'],
             port=bbs['port'],
+            created_date=now,
             method=bbs['connectiontype'].lower())
 
         statusref = Status(bbs=bbsref,

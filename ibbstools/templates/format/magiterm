@@ -1,0 +1,6 @@
+{% for bbs in bbslist %}
+[{{ bbs.name }}]
+address = {{ bbs.address }}
+port = {{ bbs.port }}
+conn type = {{ bbs.method|magiterm_connection_type }}
+{% endfor %}

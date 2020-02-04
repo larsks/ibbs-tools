@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<EtherTerm>
+  <Phonebook version="1.0">
+{% for bbs in bbslist %}
+    <BBS name="{{ bbs.name }}"
+      ip="{{ bbs.address }}"
+      port="{{ bbs.port }}"
+      protocol="{{ bbs.method|etherterm_protocol }}"
+      login=""
+      password=""
+      font="vga8x16.bmp"
+      keyMap="ANSI" />
+{% endfor %}
+  </Phonebook>
+</EtherTerm>

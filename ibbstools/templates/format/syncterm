@@ -1,0 +1,15 @@
+	DownloadPath   =
+	UploadPath     =
+	Password       =
+	ScreenMode     =80x25
+	NoStatus       =true
+	ANSIMusic      =1
+	Font           =Codepage 437 English
+        NoStatus       =true
+
+{% for bbs in bbslist %}
+[{{ bbs.name }}]
+        Address        ={{ bbs.address }}
+        Port           ={{ bbs.port }}
+        ConnectionType ={{ bbs.method }}
+{% endfor %}

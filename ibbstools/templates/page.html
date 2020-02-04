@@ -8,8 +8,9 @@
     {% endblock %}
 </head>
 <body>
-  <div id="header">
-    {% block page_header %}{% endblock %}
+  <div id="header" {% block page_header_attributes %}{% endblock %}>
+  {% block page_header %}
+  {% endblock %}
   </div>
 
   <div id="content">

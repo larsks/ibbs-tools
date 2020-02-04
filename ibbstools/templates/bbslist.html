@@ -2,7 +2,9 @@
 
 {% block title %}Internet BBS List{% endblock %}
 
-{% block content %}
+{% block page_header_attributes %}class="noprint"{% endblock %}
+
+{% block page_header %}
 <ul class="nav main">
   <li><a {% if active == "all" %}class="active"{% endif %}href="/">All</a></li>
   <li><a {% if active == "up" %}class="active"{% endif %}href="/up/">Up</a></li>
@@ -15,11 +17,13 @@
   <li><a href="qodem.ini">qodem.ini</a></li>
   <li><a href="etherterm.xml">etherterm.xml</a></li>
 </ul>
+{% endblock %}
 
+{% block content %}
 <table>
   <tr>
     <th>#</th>
-    <th>Name</th><th>Status</th><th>Method</th><th>Address</th><th>Port</th><th>History</th>
+    <th>Name</th><th>Status</th><th>Method</th><th>Address</th><th>Port</th><th class="noprint">History</th>
     <th>Last checked (UTC)</th>
   </tr>
 {% for bbs in bbslist %}
@@ -30,16 +34,20 @@
     <td>{{ bbs.method }}</td>
     <td>{{ bbs.address }}</td>
     <td>{{ bbs.port }}</td>
-    <td class="status">
+    <td class="status noprint">
 {% for status in get_bbs_status(bbs, 10) %}
 <span class="{{status.status}} tooltip">
   {% if status.status == 'OPEN' %}😀{% else %}😡{% endif %}
-  <span class="tooltiptext">{{ status.checked }} {{ status.status }}</span>
+  <span class="tooltiptext">{{ status.check_date }} {{ status.status }}</span>
 </span>
 {% endfor %}
     </td>
-    <td>{{ bbs.status.checked }}</td>
+    <td>{{ bbs.status.check_date }}</td>
   </tr>
 {% endfor %}
 </table>
+
+{% if generated_at %}
+<p class="generated">Generated at {{ generated_at }}</p>
+{% endif %}
 {% endblock %}

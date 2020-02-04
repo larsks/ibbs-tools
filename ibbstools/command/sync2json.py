@@ -9,7 +9,7 @@ import ibbstools.syncterm
               default='syncterm.lst')
 @click.option('-o', '--output', 'outputfile',
               type=click.File('w'), default=sys.stdout)
-def command(inputfile, outputfile):
+def sync2json(inputfile, outputfile):
     sync = ibbstools.syncterm.SynctermLst()
     with open(inputfile, 'r') as fd:
         bbslist = sync.parse(fd)

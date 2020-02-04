@@ -111,7 +111,7 @@ def check_async(ctx, inputfile, database, timeout,
             method=bbs['connectiontype'].lower())
 
         if created:
-            bbsref.created_date = now;
+            bbsref.created_date = now
 
         statusref = Status(bbs=bbsref,
                            check_date=now,

@@ -26,7 +26,7 @@
   <tr>
     <td>{{ loop.index }}</td>
     <td>{{ bbs.name }}</td>
-    <td>{% if bbs.status == "OPEN" %}UP{% else %}DOWN{% endif %}</td>
+    <td>{% if bbs.status.status == "OPEN" %}UP{% else %}DOWN{% endif %}</td>
     <td>{{ bbs.method }}</td>
     <td>{{ bbs.address }}</td>
     <td>{{ bbs.port }}</td>

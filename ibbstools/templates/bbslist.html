@@ -3,10 +3,17 @@
 {% block title %}Internet BBS List{% endblock %}
 
 {% block content %}
-<ul class="nav">
-  <li><a href="index.html">All</a></li>
-  <li><a href="up.html">Up</a></li>
-  <li><a href="down.html">Down</a></li>
+<ul class="nav main">
+  <li><a {% if active == "all" %}class="active"{% endif %}href="/">All</a></li>
+  <li><a {% if active == "up" %}class="active"{% endif %}href="/up/">Up</a></li>
+  <li><a {% if active == "down" %}class="active"{% endif %}href="/down/">Down</a></li>
+</ul>
+
+<ul class="nav sub">
+  <li><a href="syncterm.lst">syncterm.lst</a></li>
+  <li><a href="magiterm.ini">magiterm.ini</a></li>
+  <li><a href="qodem.ini">qodem.ini</a></li>
+  <li><a href="etherterm.xml">etherterm.xml</a></li>
 </ul>
 
 <table>
@@ -18,20 +25,20 @@
 {% for bbs in bbslist %}
   <tr>
     <td>{{ loop.index }}</td>
-    <td>{{ bbs.bbs.name }}</td>
+    <td>{{ bbs.name }}</td>
     <td>{% if bbs.status == "OPEN" %}UP{% else %}DOWN{% endif %}</td>
-    <td>{{ bbs.bbs.method }}</td>
-    <td>{{ bbs.bbs.address }}</td>
-    <td>{{ bbs.bbs.port }}</td>
+    <td>{{ bbs.method }}</td>
+    <td>{{ bbs.address }}</td>
+    <td>{{ bbs.port }}</td>
     <td class="status">
-{% for status in get_bbs_status(bbs.bbs, 10) %}
+{% for status in get_bbs_status(bbs, 10) %}
 <span class="{{status.status}} tooltip">
   {% if status.status == 'OPEN' %}😀{% else %}😡{% endif %}
   <span class="tooltiptext">{{ status.checked }} {{ status.status }}</span>
 </span>
 {% endfor %}
     </td>
-    <td>{{ bbs.checked }}</td>
+    <td>{{ bbs.status.checked }}</td>
   </tr>
 {% endfor %}
 </table>

@@ -1,7 +1,12 @@
+{% extends "page.html" %}
+
+{% block title %}Internet BBS List{% endblock %}
+
+{% block content %}
 <table>
   <tr>
     <th>Name</th><th>Status</th><th>Method</th><th>Address</th><th>Port</th><th>History</th>
-    <th>Last checked</th>
+    <th>Last checked (UTC)</th>
   </tr>
 {% for bbs in bbslist %}
   <tr>
@@ -12,10 +17,14 @@
     <td>{{ bbs.bbs.port }}</td>
     <td class="status">
 {% for status in get_bbs_status(bbs.bbs, 10) %}
-{% if status.status == 'OPEN' %}*{% else %}!{% endif %}
+<span class="{{status.status}} tooltip">
+  {% if status.status == 'OPEN' %}😀{% else %}😡{% endif %}
+  <span class="tooltiptext">{{ status.checked }}</span>
+</span>
 {% endfor %}
     </td>
     <td>{{ bbs.checked }}</td>
   </tr>
 {% endfor %}
 </table>
+{% endblock %}

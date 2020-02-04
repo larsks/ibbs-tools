@@ -2,12 +2,13 @@ import click
 import logging
 import types
 
+import ibbstools.command.check as check
+import ibbstools.command.export as export
+import ibbstools.command.initdb as initdb
+import ibbstools.command.render as render
+import ibbstools.command.sync2json as sync2json
 import ibbstools.command.sync2magi as sync2magi
 import ibbstools.command.sync2qodem as sync2qodem
-import ibbstools.command.sync2json as sync2json
-import ibbstools.command.check as check
-import ibbstools.command.render as render
-import ibbstools.command.export as export
 
 
 config = types.SimpleNamespace()
@@ -34,6 +35,7 @@ main.command(name='sync2json')(sync2json.sync2json)
 main.command(name='check')(check.check_async)
 main.command(name='render')(render.render)
 main.command(name='export')(export.export)
+main.command(name='initdb')(initdb.initdb)
 
 
 if __name__ == '__main__':

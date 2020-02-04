@@ -7,9 +7,6 @@ import jinja2
 
 from ibbstools.models import BBSDB, BBS, Status
 
-env = jinja2.Environment(
-    loader=jinja2.PackageLoader('ibbstools', 'templates'))
-
 status_to_char = {
     'OPEN': 'o',
     'UNREACHABLE': 'u',
@@ -39,7 +36,13 @@ def get_bbs_status(bbs, n=10):
 @click.option('-s', '--state',
               type=click.Choice(['up', 'down']))
 @click.option('-p', '--property', multiple=True)
-def render(database, state, property, outputfile):
+@click.option('-t', '--templates',
+              default='templates',
+              envvar='IBBS_TEMPLATE_PATH')
+def render(database, state, property, templates, outputfile):
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates))
+
     BBSDB.init(database)
     BBSDB.connect()
 

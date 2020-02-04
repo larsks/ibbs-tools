@@ -6,6 +6,7 @@ import ibbstools.command.sync2magi as sync2magi
 import ibbstools.command.sync2qodem as sync2qodem
 import ibbstools.command.sync2json as sync2json
 import ibbstools.command.check as check
+import ibbstools.command.render as render
 
 
 config = types.SimpleNamespace()
@@ -30,6 +31,7 @@ main.command(name='sync2magi')(sync2magi.sync2magi)
 main.command(name='sync2qodem')(sync2qodem.sync2qodem)
 main.command(name='sync2json')(sync2json.sync2json)
 main.command(name='check')(check.check_async)
+main.command(name='render')(render.render)
 
 
 if __name__ == '__main__':

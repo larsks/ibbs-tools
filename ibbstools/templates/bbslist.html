@@ -1,0 +1,21 @@
+<table>
+  <tr>
+    <th>Name</th><th>Status</th><th>Method</th><th>Address</th><th>Port</th><th>History</th>
+    <th>Last checked</th>
+  </tr>
+{% for bbs in bbslist %}
+  <tr>
+    <td>{{ bbs.bbs.name }}</td>
+    <td>{% if bbs.status == "OPEN" %}UP{% else %}DOWN{% endif %}</td>
+    <td>{{ bbs.bbs.method }}</td>
+    <td>{{ bbs.bbs.address }}</td>
+    <td>{{ bbs.bbs.port }}</td>
+    <td class="status">
+{% for status in get_bbs_status(bbs.bbs, 10) %}
+{% if status.status == 'OPEN' %}*{% else %}!{% endif %}
+{% endfor %}
+    </td>
+    <td>{{ bbs.checked }}</td>
+  </tr>
+{% endfor %}
+</table>

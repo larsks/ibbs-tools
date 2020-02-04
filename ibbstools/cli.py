@@ -29,8 +29,7 @@ def main(ctx, verbose):
 main.command(name='sync2magi')(sync2magi.sync2magi)
 main.command(name='sync2qodem')(sync2qodem.sync2qodem)
 main.command(name='sync2json')(sync2json.sync2json)
-main.command(name='check')(check.check)
-main.command(name='check_async')(check.check_async)
+main.command(name='check')(check.check_async)
 
 
 if __name__ == '__main__':

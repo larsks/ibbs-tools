@@ -24,13 +24,14 @@ env.filters = ibbstools.filters.filters
               default='syncterm')
 def export(database, state, format, outputfile):
     BBSDB.init(database)
+    BBSDB.connect()
 
     bbslist = (
         BBS.select(BBS, Status)
         .join(Status)
         .order_by(BBS.name)
         .group_by(BBS.name)
-        .having(Status.checked == peewee.fn.MAX(Status.checked))
+        .having(Status.check_date == peewee.fn.MAX(Status.check_date))
     )
 
     if state == 'up':

@@ -1,4 +1,5 @@
 import click
+import datetime
 import peewee
 import sys
 
@@ -24,7 +25,7 @@ def get_bbs_status(bbs, n=10):
         Status.select(Status, BBS)
         .join(BBS)
         .where(Status.bbs == bbs)
-        .order_by(Status.checked)
+        .order_by(Status.check_date)
         .limit(n)
     )
 
@@ -40,6 +41,7 @@ def get_bbs_status(bbs, n=10):
 @click.option('-p', '--property', multiple=True)
 def render(database, state, property, outputfile):
     BBSDB.init(database)
+    BBSDB.connect()
 
     properties = dict(x.split('=') for x in property)
 
@@ -48,7 +50,7 @@ def render(database, state, property, outputfile):
         .join(Status)
         .order_by(BBS.name)
         .group_by(BBS.name)
-        .having(Status.checked == peewee.fn.MAX(Status.checked))
+        .having(Status.check_date == peewee.fn.MAX(Status.check_date))
     )
 
     if state == 'up':

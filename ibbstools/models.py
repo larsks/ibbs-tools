@@ -16,7 +16,7 @@ class BBS(peewee.Model):
 class Status(peewee.Model):
 
     bbs = peewee.ForeignKeyField(BBS, backref='checks')
-    checked = peewee.DateTimeField()
+    check_date = peewee.DateTimeField()
     status = peewee.TextField()
 
     class Meta:

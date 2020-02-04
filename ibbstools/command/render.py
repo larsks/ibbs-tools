@@ -5,6 +5,7 @@ import sys
 
 import jinja2
 
+import ibbstools.filters
 from ibbstools.models import BBSDB, BBS, Status
 
 status_to_char = {
@@ -42,6 +43,7 @@ def get_bbs_status(bbs, n=10):
 def render(database, state, property, templates, outputfile):
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates))
+    env.filters = ibbstools.filters.filters
 
     BBSDB.init(database)
     BBSDB.connect()

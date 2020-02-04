@@ -5,9 +5,9 @@ TIMEOUT = 20
 MAXC = 100
 
 HTMLDOCS = \
-	   publish/index.html \
-	   publish/up.html \
-	   publish/down.html
+	   html/index.html \
+	   html/up.html \
+	   html/down.html
 
 GENERATED = \
 	    magiterm.ini \
@@ -42,11 +42,11 @@ $(IBBS)/syncterm.lst: $(IBBS)
 	ibbs check -i $(IBBS)/syncterm.lst -d $(BBSDB) \
 		-t $(TIMEOUT) -m $(MAXC) && touch .lastcheck
 
-publish/up.html: .lastcheck
+html/up.html: .lastcheck
 	ibbs render -s up -o $@
 
-publish/down.html: .lastcheck
+html/down.html: .lastcheck
 	ibbs render -s down -o $@
 
-publish/index.html: .lastcheck
+html/index.html: .lastcheck
 	ibbs render -o $@

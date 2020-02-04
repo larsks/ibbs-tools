@@ -133,9 +133,11 @@ async def async_try_connect(bbs, sem, timeout=None):
 @click.option('-d', '--database', default='bbsdb.sqlite')
 @click.option('-t', '--timeout', type=int, default=10)
 @click.option('-m', '--max-concurrency', type=int, default=10)
+@click.option('-n', '--no-update', is_flag=True)
 @click.argument('patterns', nargs=-1)
 @click.pass_context
-def check_async(ctx, inputfile, database, timeout, max_concurrency, patterns):
+def check_async(ctx, inputfile, database, timeout,
+                max_concurrency, no_update, patterns):
     # suppress peewee debug logging unless verbose >= 3 (-vvv)
     if ctx.obj.verbose < 3:
         peewee_logger = logging.getLogger('peewee')
@@ -162,6 +164,9 @@ def check_async(ctx, inputfile, database, timeout, max_concurrency, patterns):
         done, pending = loop.run_until_complete(
             asyncio.wait(tasks)
         )
+
+    if no_update:
+        return
 
     for result in done:
         bbs, status = result.result()

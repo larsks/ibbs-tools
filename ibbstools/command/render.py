@@ -37,14 +37,17 @@ def get_bbs_status(bbs, n=10):
               default=sys.stdout)
 @click.option('-s', '--state',
               type=click.Choice(['up', 'down']))
-def render(database, state, outputfile):
+@click.option('-p', '--property', multiple=True)
+def render(database, state, property, outputfile):
     BBSDB.init(database)
 
+    properties = dict(x.split('=') for x in property)
+
     bbslist = (
-        Status.select(Status, BBS)
-        .join(BBS)
+        BBS.select(BBS, Status)
+        .join(Status)
         .order_by(BBS.name)
-        .group_by(Status.bbs)
+        .group_by(BBS.name)
         .having(Status.checked == peewee.fn.MAX(Status.checked))
     )
 
@@ -59,4 +62,4 @@ def render(database, state, outputfile):
         outputfile.write(template.render(
             bbslist=bbslist,
             get_bbs_status=get_bbs_status,
-            status_to_char=status_to_char))
+            **properties))

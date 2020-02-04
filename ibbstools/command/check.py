@@ -46,10 +46,11 @@ async def async_try_connect(bbs, sem, timeout=None):
             LOG.debug('%s: connection failed: hostname unknown', name)
             status = STATUS.UNKNOWN
         except OSError as err:
-            LOG.error('%s: connection failed: %s: %s', name, type(err), err)
+            LOG.debug('%s: connection failed: %s: %s', name, type(err), err)
             if err.errno == errno.EHOSTUNREACH:
                 status = STATUS.UNREACHABLE
             else:
+                LOG.error('%s: connection failed: %s: %s', name, type(err), err)
                 status = STATUS.OTHER
         except Exception as err:
             LOG.error('%s: connection failed: %s: %s', name, type(err), err)

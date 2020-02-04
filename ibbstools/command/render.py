@@ -35,7 +35,9 @@ def get_bbs_status(bbs, n=10):
 @click.option('-o', '--output', 'outputfile',
               type=click.File('w'),
               default=sys.stdout)
-def render(database, outputfile):
+@click.option('-s', '--state',
+              type=click.Choice(['up', 'down']))
+def render(database, state, outputfile):
     BBSDB.init(database)
 
     bbslist = (
@@ -45,6 +47,11 @@ def render(database, outputfile):
         .group_by(Status.bbs)
         .having(Status.checked == peewee.fn.MAX(Status.checked))
     )
+
+    if state == 'up':
+        bbslist = bbslist.having(Status.status == 'OPEN')
+    elif state == 'down':
+        bbslist = bbslist.having(Status.status != 'OPEN')
 
     template = env.get_template('bbslist.html')
 

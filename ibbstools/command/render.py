@@ -68,7 +68,7 @@ def render(database, state, property, outputfile, template):
                       Status.status,
                       peewee.fn.Count(Status.id).alias('count'))
         .group_by(Status.check_date, Status.status)
-        .order_by(Status.check_date, Status.status)
+        .order_by(Status.check_date.desc(), Status.status)
     )
 
     status_summary = itertools.groupby(status_summary, lambda x: x.check_date)

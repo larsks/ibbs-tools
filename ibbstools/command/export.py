@@ -25,6 +25,7 @@ env.filters = ibbstools.filters.filters
 def export(database, state, format, outputfile):
     BBSDB.init(database)
     BBSDB.connect()
+    BBSDB.create_tables([BBS, Status])
 
     bbslist = (
         BBS.select(BBS, Status)

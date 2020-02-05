@@ -3,13 +3,11 @@ import click
 import datetime
 import enum
 import errno
-import fnmatch
 import logging
 import socket
 
 import concurrent.futures
 
-import ibbstools.syncterm
 from ibbstools.models import BBSDB, BBS, Status
 
 LOG = logging.getLogger(__name__)
@@ -25,9 +23,13 @@ class STATUS(enum.Enum):
 
 
 async def async_try_connect(bbs, sem, timeout=None):
-    name = bbs['name']
-    host = bbs['address']
-    port = int(bbs['port'])
+    name = bbs.name
+    host = bbs.address
+    port = bbs.port
+
+    # some listsings have the host address as user@host
+    if '@' in host:
+        user, host = host.split('@', 1)
 
     async with sem:
         LOG.info('%s: checking %s:%d', name, host, port)
@@ -62,60 +64,41 @@ async def async_try_connect(bbs, sem, timeout=None):
     return (bbs, status)
 
 
-@click.option('-i', '--input', 'inputfile',
-              default='syncterm.lst')
 @click.option('-d', '--database', default='bbsdb.sqlite')
 @click.option('-t', '--timeout', type=int, default=10)
 @click.option('-m', '--max-concurrency', type=int, default=10)
 @click.option('-n', '--no-update', is_flag=True)
-@click.argument('patterns', nargs=-1)
-@click.pass_context
-def check_async(ctx, inputfile, database, timeout,
-                max_concurrency, no_update, patterns):
-    # suppress peewee debug logging unless verbose >= 3 (-vvv)
-    if ctx.obj.verbose < 3:
-        peewee_logger = logging.getLogger('peewee')
-        peewee_logger.setLevel('WARNING')
-
+def check_async(database, timeout, max_concurrency, no_update):
     BBSDB.init(database)
     BBSDB.connect()
     BBSDB.create_tables([BBS, Status])
 
-    sync = ibbstools.syncterm.SynctermLst()
     now = datetime.datetime.utcnow()
-    with open(inputfile, 'r') as fd:
-        bbslist = sync.parse(fd)
-        loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
+    sem = asyncio.Semaphore(max_concurrency)
+    bbslist = BBS.select()
 
-        if patterns:
-            bbslist = (bbs for bbs in bbslist
-                       if any(fnmatch.fnmatch(bbs['name'], pattern)
-                              for pattern in patterns))
-
-        sem = asyncio.Semaphore(max_concurrency)
-        tasks = [async_try_connect(bbs, sem, timeout=timeout)
-                 for bbs in bbslist]
-        done, pending = loop.run_until_complete(
-            asyncio.wait(tasks)
-        )
+    tasks = [async_try_connect(bbs, sem, timeout=timeout) for bbs in bbslist]
+    done, pending = loop.run_until_complete(
+        asyncio.wait(tasks)
+    )
 
     if no_update:
         return
 
+    summary = {}
     for result in done:
         bbs, status = result.result()
-        bbsref, created = BBS.get_or_create(
-            name=bbs['name'],
-            address=bbs['address'],
-            port=bbs['port'],
-            method=bbs['connectiontype'].lower())
 
-        if created:
-            bbsref.created_date = now
+        status = str(status).split('.')[1]
+        summary[status] = summary.get(status, 0) + 1
 
-        statusref = Status(bbs=bbsref,
+        statusref = Status(bbs=bbs,
                            check_date=now,
-                           status=str(status).split('.')[1])
+                           status=status)
 
-        bbsref.save()
         statusref.save()
+
+    summary_parts = ['{} {}'.format(k, v)
+                     for k, v in sorted(summary.items())]
+    LOG.info(', '.join(summary_parts))

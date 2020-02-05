@@ -1,9 +1,10 @@
 import click
-import datetime
+import itertools
+import jinja2
 import peewee
 import sys
 
-import jinja2
+from pathlib import Path
 
 import ibbstools.filters
 from ibbstools.models import BBSDB, BBS, Status
@@ -37,13 +38,12 @@ def get_bbs_status(bbs, n=10):
 @click.option('-s', '--state',
               type=click.Choice(['up', 'down']))
 @click.option('-p', '--property', multiple=True)
-@click.option('-t', '--templates',
-              default='templates',
-              envvar='IBBS_TEMPLATE_PATH')
-def render(database, state, property, templates, outputfile):
+@click.argument('template', type=Path)
+def render(database, state, property, outputfile, template):
     env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(templates))
+        loader=jinja2.FileSystemLoader(str(template.parent)))
     env.filters = ibbstools.filters.filters
+    t = env.get_template(str(template.name))
 
     BBSDB.init(database)
     BBSDB.connect()
@@ -63,10 +63,23 @@ def render(database, state, property, templates, outputfile):
     elif state == 'down':
         bbslist = bbslist.having(Status.status != 'OPEN')
 
-    template = env.get_template('bbslist.html')
+    status_summary = (
+        Status.select(Status.check_date,
+                      Status.status,
+                      peewee.fn.Count(Status.id).alias('count'))
+        .group_by(Status.check_date, Status.status)
+        .order_by(Status.check_date, Status.status)
+    )
+
+    status_summary = itertools.groupby(status_summary, lambda x: x.check_date)
+    status_summary = [
+        {'date': date, 'summary': {x.status: x.count for x in results}}
+        for date, results in status_summary
+    ]
 
     with outputfile:
-        outputfile.write(template.render(
+        outputfile.write(t.render(
             bbslist=bbslist,
+            status_summary=status_summary,
             get_bbs_status=get_bbs_status,
             **properties))

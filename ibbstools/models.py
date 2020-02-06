@@ -5,17 +5,19 @@ BBSDB = peewee.SqliteDatabase(None,
                               pragmas=(('foreign_keys', 'on'),))
 
 
-class Import(peewee.Model):
+class Base(peewee.Model):
+    class Meta:
+        database = BBSDB
+
+
+class Import(Base):
     name = peewee.TextField(unique=True)
     address = peewee.TextField()
     port = peewee.IntegerField()
     method = peewee.TextField()
 
-    class Meta:
-        database = BBSDB
 
-
-class BBS(peewee.Model):
+class BBS(Base):
     name = peewee.TextField(unique=True)
     address = peewee.TextField()
     port = peewee.IntegerField()
@@ -23,11 +25,8 @@ class BBS(peewee.Model):
     created_date = peewee.DateTimeField(
         constraints=[peewee.SQL('DEFAULT CURRENT_TIMESTAMP')])
 
-    class Meta:
-        database = BBSDB
 
-
-class Status(peewee.Model):
+class Status(Base):
 
     bbs = peewee.ForeignKeyField(
         BBS,
@@ -35,6 +34,3 @@ class Status(peewee.Model):
         on_delete='CASCADE')
     check_date = peewee.DateTimeField()
     status = peewee.TextField()
-
-    class Meta:
-        database = BBSDB

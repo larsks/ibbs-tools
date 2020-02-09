@@ -20,7 +20,7 @@ def etherterm_protocol(val):
 
 
 def magiterm_connection_type(val):
-    return val
+    return ['ssh', 'telnet'].index(val)
 
 
 filters = {

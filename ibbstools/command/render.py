@@ -24,11 +24,30 @@ def get_bbs_status(bbs, n=10):
         Status.select(Status, BBS)
         .join(BBS)
         .where(Status.bbs == bbs)
-        .order_by(Status.check_date)
+        .order_by(Status.check_date.desc())
         .limit(n)
     )
 
-    return status
+    # TODO: This is me giving up on fighting peewee to get the correct
+    # ordering in our sql query.
+    return sorted(status, key=lambda x: x.check_date)
+
+
+def get_summary():
+    summary = (
+        Status.select(Status.check_date,
+                      Status.status,
+                      peewee.fn.Count(Status.id).alias('count'))
+        .group_by(Status.check_date, Status.status)
+        .order_by(Status.check_date.desc(), Status.status)
+    )
+    summary = itertools.groupby(summary, lambda x: x.check_date)
+    summary = [
+        {'date': date, 'summary': {x.status: x.count for x in results}}
+        for date, results in summary
+    ]
+
+    return summary
 
 
 @click.option('-d', '--database', default='bbsdb.sqlite')
@@ -63,19 +82,7 @@ def render(database, state, property, outputfile, template):
     elif state == 'down':
         bbslist = bbslist.having(Status.status != 'OPEN')
 
-    status_summary = (
-        Status.select(Status.check_date,
-                      Status.status,
-                      peewee.fn.Count(Status.id).alias('count'))
-        .group_by(Status.check_date, Status.status)
-        .order_by(Status.check_date.desc(), Status.status)
-    )
-
-    status_summary = itertools.groupby(status_summary, lambda x: x.check_date)
-    status_summary = [
-        {'date': date, 'summary': {x.status: x.count for x in results}}
-        for date, results in status_summary
-    ]
+    status_summary = get_summary()
 
     with outputfile:
         outputfile.write(t.render(

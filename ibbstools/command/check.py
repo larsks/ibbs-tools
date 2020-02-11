@@ -35,7 +35,8 @@ async def async_try_connect(bbs, sem, timeout=None):
         LOG.info('%s: checking %s:%d', name, host, port)
         try:
             reader, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=timeout)
+                asyncio.open_connection(host, port, family=socket.AF_INET),
+                timeout=timeout)
             writer.close()
             await writer.wait_closed()
         except (socket.timeout, concurrent.futures.TimeoutError):
